@@ -110,7 +110,11 @@ export const ReportBTN = styled.button`
   color: white;
   border-radius: 50px;
   padding: 12px;
-  width: 100%;
+  width: 60%;
+  display: flex;
+  align-self: center;
+  justify-content: center;
+  align-items: center;
   height: 40px;
   font-size: 16px;
   font-weight: 600;

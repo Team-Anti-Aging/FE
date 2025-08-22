@@ -423,9 +423,19 @@ export default function ReportPage({
             style={{ width: "min-content", height: "min-content" }}
           />
           <MyLocation>
-            현재 나의 위치
-            <span style={{ fontSize: "17px", fontWeight: 500, color: "black" }}>
-              {currentAddress}
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "gray" }}>
+              현재 나의 위치
+            </span>
+            <span style={{ fontSize: "14px", fontWeight: 600, color: "black" }}>
+              {currentAddress.includes(
+                "Safari에서 위치 권한이 거부되었습니다"
+              ) ? (
+                <span style={{ fontSize: "14px", color: "#666" }}>
+                  {currentAddress}
+                </span>
+              ) : (
+                currentAddress
+              )}
             </span>
             {isLoadingLocation && (
               <div
@@ -456,13 +466,13 @@ export default function ReportPage({
                 <button
                   onClick={getCurrentLocation}
                   style={{
-                    padding: "8px 16px",
+                    padding: "4px 8px",
                     border: "1px solid #0068B7",
                     borderRadius: "20px",
                     background: "#0068B7",
                     color: "white",
                     cursor: "pointer",
-                    fontSize: "14px",
+                    fontSize: "12px",
                     display: "flex",
                     alignItems: "center",
                     gap: "5px",
@@ -572,8 +582,9 @@ export default function ReportPage({
                 <button
                   onClick={() => setReportCategory("안전")}
                   style={{
-                    padding: "8px 16px",
+                    padding: "5px 18px",
                     borderRadius: "20px",
+                    fontSize: "14px",
                     border: "1px solid #ddd",
                     background: reportCategory === "안전" ? "#0068B7" : "white",
                     color: reportCategory === "안전" ? "white" : "#333",
@@ -585,8 +596,9 @@ export default function ReportPage({
                 <button
                   onClick={() => setReportCategory("청결")}
                   style={{
-                    padding: "8px 16px",
+                    padding: "5px 18px",
                     borderRadius: "20px",
+                    fontSize: "14px",
                     border: "1px solid #ddd",
                     background: reportCategory === "청결" ? "#0068B7" : "white",
                     color: reportCategory === "청결" ? "white" : "#333",
@@ -598,8 +610,9 @@ export default function ReportPage({
                 <button
                   onClick={() => setReportCategory("소음-방해")}
                   style={{
-                    padding: "8px 16px",
+                    padding: "5px 18px",
                     borderRadius: "20px",
+                    fontSize: "14px",
                     border: "1px solid #ddd",
                     background:
                       reportCategory === "소음-방해" ? "#0068B7" : "white",
@@ -612,8 +625,9 @@ export default function ReportPage({
                 <button
                   onClick={() => setReportCategory("이동성")}
                   style={{
-                    padding: "8px 16px",
+                    padding: "5px 18px",
                     borderRadius: "20px",
+                    fontSize: "14px",
                     border: "1px solid #ddd",
                     background:
                       reportCategory === "이동성" ? "#0068B7" : "white",
@@ -626,8 +640,9 @@ export default function ReportPage({
                 <button
                   onClick={() => setReportCategory("기타")}
                   style={{
-                    padding: "8px 16px",
+                    padding: "5px 18px",
                     borderRadius: "20px",
+                    fontSize: "14px",
                     border: "1px solid #ddd",
                     background: reportCategory === "기타" ? "#0068B7" : "white",
                     color: reportCategory === "기타" ? "white" : "#333",
@@ -643,8 +658,9 @@ export default function ReportPage({
                 <button
                   onClick={() => setReportCategory("경관 개선")}
                   style={{
-                    padding: "8px 16px",
+                    padding: "5px 18px",
                     borderRadius: "20px",
+                    fontSize: "14px",
                     border: "1px solid #ddd",
                     background:
                       reportCategory === "경관 개선" ? "#0068B7" : "white",
@@ -657,8 +673,9 @@ export default function ReportPage({
                 <button
                   onClick={() => setReportCategory("정보 제공")}
                   style={{
-                    padding: "8px 16px",
+                    padding: "5px 18px",
                     borderRadius: "20px",
+                    fontSize: "14px",
                     border: "1px solid #ddd",
                     background:
                       reportCategory === "정보 제공" ? "#0068B7" : "white",
@@ -671,8 +688,9 @@ export default function ReportPage({
                 <button
                   onClick={() => setReportCategory("프로그램/이벤트")}
                   style={{
-                    padding: "8px 16px",
+                    padding: "5px 18px",
                     borderRadius: "20px",
+                    fontSize: "14px",
                     border: "1px solid #ddd",
                     background:
                       reportCategory === "프로그램/이벤트"
@@ -688,8 +706,9 @@ export default function ReportPage({
                 <button
                   onClick={() => setReportCategory("편의시설 확충")}
                   style={{
-                    padding: "8px 16px",
+                    padding: "5px 18px",
                     borderRadius: "20px",
+                    fontSize: "14px",
                     border: "1px solid #ddd",
                     background:
                       reportCategory === "편의시설 확충" ? "#0068B7" : "white",
@@ -703,8 +722,9 @@ export default function ReportPage({
                 <button
                   onClick={() => setReportCategory("기타")}
                   style={{
-                    padding: "8px 16px",
+                    padding: "5px 18px",
                     borderRadius: "20px",
+                    fontSize: "14px",
                     border: "1px solid #ddd",
                     background: reportCategory === "기타" ? "#0068B7" : "white",
                     color: reportCategory === "기타" ? "white" : "#333",
@@ -764,7 +784,10 @@ export default function ReportPage({
               color: "white",
               borderRadius: "50px",
               padding: "12px",
-              width: "100%",
+              width: "60%",
+              justifyContent: "center",
+              alignItems: "center",
+              display: "flex",
               height: "40px",
               border: "none",
               cursor: "pointer",
