@@ -22,7 +22,7 @@ import {
 } from "../common/Menu/Menu.styled";
 import Search from "../../assets/Search.svg";
 import Camera from "../../assets/camera.svg";
-import Person from "../../assets/Person.png";
+import Person from "../../assets/person.png";
 
 const AccountInfo = styled.div`
   display: flex;
