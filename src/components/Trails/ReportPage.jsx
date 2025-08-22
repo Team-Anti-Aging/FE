@@ -22,6 +22,7 @@ import {
 import styled from "styled-components";
 import Location from "../../assets/location.png";
 import Camera from "../../assets/camera.svg";
+import { ALL_TRAILS } from "./TrailData.js";
 
 const BASEURL = "/api"; // 프록시를 통해 요청
 
@@ -60,7 +61,12 @@ const ImagePreview = styled.div`
   }
 `;
 
-export default function ReportPage({ trail, onClose, onBackToTrailDetail }) {
+export default function ReportPage({
+  trail,
+  onClose,
+  onBackToTrailDetail,
+  cameraPhoto,
+}) {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [currentAddress, setCurrentAddress] =
     useState("위치 정보 가져오는 중...");
@@ -70,6 +76,8 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail }) {
   const [reportType, setReportType] = useState("제안");
   const [reportCategory, setReportCategory] = useState("경관 개선"); // 카테고리
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTrail, setSelectedTrail] = useState(trail); // 선택된 trail
+  const [showTrailSelector, setShowTrailSelector] = useState(false); // trail 선택기 표시 여부
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -197,7 +205,7 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail }) {
 
       // JSON 데이터 준비
       const requestData = {
-        walktrail: trail.name, // ID 대신 산책로 이름 사용
+        walktrail: selectedTrail.name, // 선택된 trail 이름 사용
         location: currentAddress,
         type: reportType, // "불편" 또는 "제안"
         category: reportCategory, // 카테고리 (예: "road", "facility", "safety" 등)
@@ -254,6 +262,23 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail }) {
     getCurrentLocation();
   }, []);
 
+  // 카메라로 찍은 사진이 있으면 자동으로 설정
+  useEffect(() => {
+    if (cameraPhoto) {
+      setSelectedImage(cameraPhoto);
+
+      // 미리보기 생성
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(cameraPhoto);
+
+      // 카메라로 찍은 사진이 있으면 trail 선택기 표시
+      setShowTrailSelector(true);
+    }
+  }, [cameraPhoto]);
+
   return (
     <BottomSheet
       open={true}
@@ -276,7 +301,69 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail }) {
         </Header>
 
         <Section>
-          <SectionTitle>현재 산책로 - {trail.name} </SectionTitle>
+          <SectionTitle>
+            {showTrailSelector
+              ? "산책로 선택"
+              : `현재 산책로 - ${selectedTrail.name}`}
+          </SectionTitle>
+          {showTrailSelector && (
+            <div style={{ marginTop: "10px" }}>
+              <div
+                style={{
+                  fontSize: "14px",
+                  color: "#666",
+                  marginBottom: "10px",
+                }}
+              >
+                사진을 찍은 산책로를 선택해주세요:
+              </div>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              >
+                {ALL_TRAILS.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => {
+                      setSelectedTrail(t);
+                      setShowTrailSelector(false);
+                    }}
+                    style={{
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      borderRadius: "8px",
+                      background:
+                        selectedTrail.id === t.id ? "#0068B7" : "white",
+                      color: selectedTrail.id === t.id ? "white" : "#333",
+                      cursor: "pointer",
+                      textAlign: "left",
+                    }}
+                  >
+                    <div style={{ fontWeight: "bold" }}>{t.name}</div>
+                    <div style={{ fontSize: "12px", opacity: 0.8 }}>
+                      {t.duration} · {t.distance_km}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {!showTrailSelector && cameraPhoto && (
+            <button
+              onClick={() => setShowTrailSelector(true)}
+              style={{
+                marginTop: "10px",
+                padding: "8px 16px",
+                border: "1px solid #0068B7",
+                borderRadius: "20px",
+                background: "white",
+                color: "#0068B7",
+                cursor: "pointer",
+                fontSize: "14px",
+              }}
+            >
+              산책로 변경하기
+            </button>
+          )}
         </Section>
 
         <ReportSection>

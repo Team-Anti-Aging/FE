@@ -24,6 +24,7 @@ export default function TrailListSheet({
   onOpenMyAccount,
   onOpenLogin,
   onClose,
+  onCameraPhotoTaken,
 }) {
   const items = Array.isArray(trails) ? trails.slice() : [];
   const fileInputRef = useRef(null);
@@ -34,6 +35,11 @@ export default function TrailListSheet({
   // 카메라 버튼 클릭 핸들러
   const handleCameraClick = async () => {
     console.log("하단 카메라 버튼 클릭됨");
+
+    // 사용자에게 안내
+    alert(
+      "민원 신청을 위한 사진을 촬영합니다. 사진 촬영 후 자동으로 민원 신청 페이지로 이동합니다."
+    );
 
     // 먼저 파일 선택 다이얼로그를 열어보기
     try {
@@ -73,8 +79,23 @@ export default function TrailListSheet({
     const file = event.target.files[0];
     if (file) {
       console.log("선택된 파일:", file.name);
-      // 여기서 파일을 처리하거나 다른 작업을 할 수 있습니다
-      alert(`파일이 선택되었습니다: ${file.name}`);
+
+      // 파일 크기 체크 (5MB 제한)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("파일 크기는 5MB 이하여야 합니다.");
+        return;
+      }
+
+      // 이미지 파일인지 체크
+      if (!file.type.startsWith("image/")) {
+        alert("이미지 파일만 선택할 수 있습니다.");
+        return;
+      }
+
+      // 부모 컴포넌트에 사진 데이터 전달
+      if (onCameraPhotoTaken) {
+        onCameraPhotoTaken(file);
+      }
     }
   };
 

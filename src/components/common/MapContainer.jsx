@@ -22,6 +22,7 @@ function MapContainer({
   const [map, setMap] = useState(null);
   const [showDetailSheet, setShowDetailSheet] = useState(false);
   const [currentPanel, setCurrentPanel] = useState("trail-list"); // 'trail-list', 'trail-detail', 'report', 'my-account'
+  const [cameraPhoto, setCameraPhoto] = useState(null); // 카메라로 찍은 사진
 
   // 피드백 데이터가 변경될 때마다 로그 출력
   useEffect(() => {
@@ -97,6 +98,23 @@ function MapContainer({
   const handleOpenLogin = () => {
     window.location.href = "/login";
     console.log("로그인 페이지로 이동");
+  };
+
+  // 카메라로 찍은 사진 처리
+  const handleCameraPhotoTaken = (photoFile) => {
+    setCameraPhoto(photoFile);
+    console.log("카메라로 찍은 사진 저장됨:", photoFile.name);
+
+    // 사진을 찍은 후 바로 ReportPage로 이동하도록 안내
+    alert("사진이 촬영되었습니다. 민원 신청 페이지로 이동합니다.");
+
+    // 현재 선택된 trail이 없으면 기본 trail 선택 (예: 첫 번째 trail)
+    if (!selectedTrail && ALL_TRAILS.length > 0) {
+      setSelectedTrail(ALL_TRAILS[0]);
+    }
+
+    // ReportPage로 이동
+    setCurrentPanel("report");
   };
 
   // selectedTrail이 바뀔 때마다 지도 영역 맞추기
@@ -184,6 +202,7 @@ function MapContainer({
         onClose={onCloseSheet}
         onOpenMyAccount={handleOpenMyAccount}
         onOpenLogin={handleOpenLogin}
+        onCameraPhotoTaken={handleCameraPhotoTaken}
       />
 
       {/* Trail 세부정보 시트 */}
@@ -201,6 +220,11 @@ function MapContainer({
         <ReportPage
           trail={selectedTrail}
           onBackToTrailDetail={handleBackToTrailDetail}
+          cameraPhoto={cameraPhoto}
+          onClose={() => {
+            setCurrentPanel("trail-list");
+            setCameraPhoto(null); // 사진 초기화
+          }}
         />
       )}
 
