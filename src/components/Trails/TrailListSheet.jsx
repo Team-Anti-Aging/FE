@@ -144,14 +144,14 @@ export default function TrailListSheet({
       <MenuContainer>
         <MenuInner>
           <MenusubInner1 onClick={onOpenSearch}>
-            <img src={Search} alt="돋보기" width={30} height={30} />
+            <img src={Search} alt="돋보기" width={20} height={20} />
             산책하기
           </MenusubInner1>
           <MenuCam onClick={handleCameraClick} style={{ cursor: "pointer" }}>
-            <img src={Camera} alt="카메라" width={40} height={40} />
+            <img src={Camera} alt="카메라" width={30} height={30} />
           </MenuCam>
           <MenusubInner2 onClick={isLoggedIn ? onOpenMyAccount : onOpenLogin}>
-            <img src={Person} alt="계정" width={40} height={40} />
+            <img src={Person} alt="계정" width={30} height={30} />
             {isLoggedIn ? "내 계정" : "로그인"}
           </MenusubInner2>
         </MenuInner>

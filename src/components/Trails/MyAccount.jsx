@@ -27,8 +27,8 @@ import Person from "../../assets/person.png";
 const AccountInfo = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin: 1rem 0;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
 `;
 
 const InfoItem = styled.div`
@@ -37,6 +37,7 @@ const InfoItem = styled.div`
   align-items: center;
   padding: 12px 0;
   border-bottom: 1px solid #f1f3f5;
+  font-size: 13px;
 
   &:last-child {
     border-bottom: none;
@@ -44,7 +45,7 @@ const InfoItem = styled.div`
 `;
 
 const LogoutButton = styled.button`
-  width: 100%;
+  width: 60%;
   background: #dc3545;
   color: white;
   border: none;
@@ -54,6 +55,10 @@ const LogoutButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   margin-top: 16px;
+  display: flex;
+  align-self: center;
+  justify-content: center;
+  align-items: center;
 
   &:hover {
     background: #c82333;
@@ -133,8 +138,8 @@ export default function MyAccount({
             <Spacer />
           </Header>
 
-          <Section>
-            <SectionTitle>계정 정보</SectionTitle>
+          <Section style={{ fontSize: "13px" }}>
+            <SectionTitle $gap="10px">계정 정보</SectionTitle>
             <AccountInfo>
               <InfoItem>
                 <span>아이디</span>
