@@ -1,5 +1,5 @@
 // TrailListSheet.jsx
-import React from "react";
+import React, { useRef } from "react";
 import BottomSheet from "../common/BottomSheet/BottomSheet";
 import { List, Item, Title, HeartBtn, Meta } from "./Trail.styled";
 import {
@@ -12,7 +12,7 @@ import {
 
 import Camera from "../../assets/camera.svg";
 import Search from "../../assets/Search.svg";
-import Person from "../../assets/Person.png";
+import Person from "../../assets/person.png";
 
 export default function TrailListSheet({
   open = false,
@@ -26,9 +26,57 @@ export default function TrailListSheet({
   onClose,
 }) {
   const items = Array.isArray(trails) ? trails.slice() : [];
+  const fileInputRef = useRef(null);
 
   // 로그인 상태 확인
   const isLoggedIn = !!localStorage.getItem("accessToken");
+
+  // 카메라 버튼 클릭 핸들러
+  const handleCameraClick = async () => {
+    console.log("하단 카메라 버튼 클릭됨");
+
+    // 먼저 파일 선택 다이얼로그를 열어보기
+    try {
+      console.log("파일 선택 다이얼로그 열기 시도");
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      } else {
+        console.error("fileInputRef가 null입니다");
+      }
+    } catch (error) {
+      console.error("파일 선택 다이얼로그 열기 실패:", error);
+    }
+
+    // 추가로 카메라 권한 요청 시도 (선택적)
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      console.log("getUserMedia 지원됨, 카메라 권한 요청 시도");
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "environment",
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+          },
+        });
+        console.log("카메라 권한 획득 성공");
+        stream.getTracks().forEach((track) => track.stop());
+      } catch (error) {
+        console.log("카메라 권한 요청 실패:", error);
+      }
+    } else {
+      console.log("getUserMedia 지원되지 않음");
+    }
+  };
+
+  // 파일 선택 처리
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      console.log("선택된 파일:", file.name);
+      // 여기서 파일을 처리하거나 다른 작업을 할 수 있습니다
+      alert(`파일이 선택되었습니다: ${file.name}`);
+    }
+  };
 
   return (
     <>
@@ -78,7 +126,7 @@ export default function TrailListSheet({
             <img src={Search} alt="돋보기" width={30} height={30} />
             산책하기
           </MenusubInner1>
-          <MenuCam>
+          <MenuCam onClick={handleCameraClick} style={{ cursor: "pointer" }}>
             <img src={Camera} alt="카메라" width={40} height={40} />
           </MenuCam>
           <MenusubInner2 onClick={isLoggedIn ? onOpenMyAccount : onOpenLogin}>
@@ -87,6 +135,16 @@ export default function TrailListSheet({
           </MenusubInner2>
         </MenuInner>
       </MenuContainer>
+
+      {/* 숨겨진 파일 입력 */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture
+        style={{ display: "none" }}
+        onChange={handleFileSelect}
+      />
     </>
   );
 }
