@@ -1,6 +1,6 @@
 // src/lib/api.ts
-export const API_BASE =
-  import.meta.env.VITE_API_BASE ?? "https://dev.antiaging-hufs.store";
+// Netlify 프록시를 통해 API 호출
+export const API_BASE = "/api";
 
 // 디버깅을 위한 로그
 console.log("API_BASE 환경 변수:", import.meta.env.VITE_API_BASE);

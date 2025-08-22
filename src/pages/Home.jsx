@@ -39,30 +39,44 @@ function Home() {
       }
 
       const trailName = selectedTrail.name;
+      const apiUrl = `${BASEURL}/walktrails/feedback/${trailName}/${type}/`;
       console.log(`${trailName}의 ${type} 피드백 데이터를 가져오는 중...`);
+      console.log("API URL:", apiUrl);
 
-      const response = await fetch(
-        `${BASEURL}/walktrails/feedback/${trailName}/${type}/`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            // 인증이 필요한 경우 토큰 추가
-            // "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          // 인증이 필요한 경우 토큰 추가
+          // "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
 
       if (response.ok) {
-        const data = await response.json();
-        setFeedbackData(data);
-        console.log(`${type} 피드백 데이터:`, data);
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          setFeedbackData(data);
+          console.log(`${type} 피드백 데이터:`, data);
+        } else {
+          console.error("응답이 JSON 형식이 아닙니다:", contentType);
+          setFeedbackData([]);
+        }
       } else {
-        console.error("피드백 데이터 가져오기 실패:", response.status);
+        console.error(
+          "피드백 데이터 가져오기 실패:",
+          response.status,
+          response.statusText
+        );
         setFeedbackData([]);
       }
     } catch (error) {
       console.error("피드백 데이터 가져오기 중 오류:", error);
+      if (error.name === "SyntaxError") {
+        console.error(
+          "JSON 파싱 오류 - 서버에서 HTML 응답을 받았을 수 있습니다"
+        );
+      }
       setFeedbackData([]);
     } finally {
       setLoading(false);

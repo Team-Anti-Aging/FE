@@ -1,1 +1,5 @@
+# API 프록시 규칙
+/api/* https://dev.antiaging-hufs.store/:splat 200
+
+# SPA 라우팅
 /* /index.html 200
