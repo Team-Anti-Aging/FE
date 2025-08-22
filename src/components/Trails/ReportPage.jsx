@@ -1,0 +1,489 @@
+// ReportPage.jsx
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import BottomSheet from "../common/BottomSheet/BottomSheet";
+import {
+  Header,
+  BackButton,
+  TitleSection,
+  Title,
+  Meta,
+  Spacer,
+  Section,
+  SectionTitle,
+  Description,
+  ActionButton,
+  ReportSection,
+  ReportBTN,
+  Whole,
+  RemoveButton,
+  ICONDIV,
+} from "./TrailDetailSheet.styled";
+import styled from "styled-components";
+import Location from "../../assets/location.png";
+import Camera from "../../assets/camera.svg";
+
+const BASEURL = "/api"; // 프록시를 통해 요청
+
+const MyLocation = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  // align-items: center;
+  padding: 12px 0;
+  font-size: 14px;
+  color: #374151;
+
+  span {
+    color: #6b7280;
+    font-size: 12px;
+  }
+`;
+
+const ImagePreview = styled.div`
+  width: 100%;
+  max-width: 150px;
+  height: 100px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+  overflow: hidden;
+  position: relative;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+export default function ReportPage({ trail, onClose, onBackToTrailDetail }) {
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [currentAddress, setCurrentAddress] =
+    useState("위치 정보 가져오는 중...");
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [reportText, setReportText] = useState("");
+  const [reportType, setReportType] = useState("inconvenience"); // "inconvenience" 또는 "suggestion"
+  const [reportCategory, setReportCategory] = useState("road"); // 카테고리
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef(null);
+  const navigate = useNavigate();
+
+  // 좌표를 주소로 변환하는 함수
+  const getAddressFromCoords = (lat, lng) => {
+    if (!window.kakao || !window.kakao.maps) {
+      console.error("카카오맵 API가 로드되지 않았습니다.");
+      return;
+    }
+
+    const geocoder = new window.kakao.maps.services.Geocoder();
+    const coord = new window.kakao.maps.LatLng(lat, lng);
+
+    geocoder.coord2Address(coord.getLng(), coord.getLat(), (result, status) => {
+      if (status === window.kakao.maps.services.Status.OK) {
+        const address = result[0].address.address_name;
+        setCurrentAddress(address);
+      } else {
+        console.error("주소 변환에 실패했습니다:", status);
+        setCurrentAddress("주소를 가져올 수 없습니다");
+      }
+    });
+  };
+
+  // 웹 브라우저 기본 API 사용
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          };
+          setCurrentLocation(coords);
+          // 좌표를 주소로 변환
+          getAddressFromCoords(coords.latitude, coords.longitude);
+        },
+        (error) => {
+          console.error("위치 정보를 가져올 수 없습니다:", error);
+          setCurrentAddress("위치 정보를 가져올 수 없습니다");
+        }
+      );
+    }
+  };
+
+  // 사진 첨부하기 버튼 클릭
+  const handleImageUpload = () => {
+    fileInputRef.current.click();
+  };
+
+  // 파일 선택 처리
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // 파일 크기 체크 (5MB 제한)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("파일 크기는 5MB 이하여야 합니다.");
+        return;
+      }
+
+      // 이미지 파일인지 체크
+      if (!file.type.startsWith("image/")) {
+        alert("이미지 파일만 선택할 수 있습니다.");
+        return;
+      }
+
+      setSelectedImage(file);
+
+      // 미리보기 생성
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // 이미지 제거
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // 민원 제보하기
+  const handleSubmitReport = async () => {
+    // 입력 검증
+    if (!reportText.trim()) {
+      alert("제보 내용을 입력해주세요.");
+      return;
+    }
+
+    if (!currentLocation) {
+      alert("위치 정보를 가져올 수 없습니다. 다시 시도해주세요.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // 로컬 스토리지에서 토큰 가져오기
+      const token =
+        localStorage.getItem("accessToken") ||
+        sessionStorage.getItem("accessToken");
+
+      console.log("토큰 존재 여부:", !!token);
+      console.log("토큰 값:", token ? token.substring(0, 20) + "..." : "없음");
+
+      if (!token) {
+        alert("로그인이 필요합니다. 로그인 후 다시 시도해주세요.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // JSON 데이터 준비
+      const requestData = {
+        walktrail: trail.name, // ID 대신 산책로 이름 사용
+        location: currentAddress,
+        type: reportType, // "inconvenience" 또는 "suggestion"
+        category: reportCategory, // 카테고리 (예: "road", "facility", "safety" 등)
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+        feedback_content: reportText.trim(),
+        feedback_image_url: "", // 이미지가 있다면 URL을 설정해야 함
+      };
+
+      console.log("전송할 데이터:", requestData);
+
+      const response = await fetch(`${BASEURL}/feedback/upload/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert("민원이 성공적으로 제보되었습니다!");
+        // 성공 후 초기화
+        setReportText("");
+        setSelectedImage(null);
+        setImagePreview(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        // Trail 상세정보로 돌아가기
+        onBackToTrailDetail();
+      } else if (response.status === 401) {
+        alert("로그인이 필요합니다. 로그인 후 다시 시도해주세요.");
+        navigate("/login");
+        console.error("인증 오류:", response.status, response.statusText);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        alert(
+          `민원 제보에 실패했습니다: ${errorData.message || "알 수 없는 오류"}`
+        );
+        console.error("API 오류:", response.status, errorData);
+      }
+    } catch (error) {
+      console.error("민원 제보 중 오류 발생:", error);
+      alert("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // 컴포넌트 마운트 시에만 위치 정보 가져오기
+  useEffect(() => {
+    getCurrentLocation();
+  }, []);
+
+  return (
+    <BottomSheet
+      open={true}
+      onClose={onClose}
+      height="90vh"
+      handleLabel="제보하기 페이지 닫기"
+    >
+      <Whole>
+        <Header>
+          <BackButton
+            onClick={onBackToTrailDetail}
+            aria-label="산책로 상세정보로 돌아가기"
+          >
+            ←
+          </BackButton>
+          <TitleSection>
+            <Title>제보하기</Title>
+          </TitleSection>
+          <Spacer />
+        </Header>
+
+        <Section>
+          <SectionTitle>현재 산책로 - {trail.name} </SectionTitle>
+        </Section>
+
+        <ReportSection>
+          <img
+            src={Location}
+            alt="Location"
+            style={{ width: "min-content", height: "min-content" }}
+          />
+          <MyLocation>
+            현재 나의 위치
+            <span style={{ fontSize: "17px", fontWeight: 500, color: "black" }}>
+              {currentAddress}
+            </span>
+          </MyLocation>
+        </ReportSection>
+
+        <ReportSection
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <SectionTitle
+            style={{
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+              gap: "10px",
+            }}
+          >
+            <ICONDIV>
+              <img
+                src={Camera}
+                alt="Camera"
+                style={{ width: "25px", height: "25px" }}
+              />
+            </ICONDIV>
+            제안 하는 장소의 사진
+          </SectionTitle>
+
+          {imagePreview ? (
+            <ImagePreview>
+              <img src={imagePreview} alt="미리보기" />
+              <RemoveButton onClick={handleRemoveImage}>×</RemoveButton>
+            </ImagePreview>
+          ) : (
+            <ImagePreview>
+              <div style={{ textAlign: "center", color: "#999" }}>
+                <div>📷</div>
+                <div style={{ fontSize: "12px", marginTop: "5px" }}>
+                  사진을 선택해주세요
+                </div>
+              </div>
+            </ImagePreview>
+          )}
+
+          <button
+            onClick={handleImageUpload}
+            style={{
+              backgroundColor: "#0068B7",
+              color: "white",
+              borderRadius: "50px",
+              padding: "12px",
+              width: "100%",
+              height: "40px",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            {selectedImage ? "사진 변경하기" : "사진 첨부하기"}
+          </button>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={handleFileSelect}
+          />
+        </ReportSection>
+
+        <ReportSection
+          style={{
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <SectionTitle style={{ width: "95%", marginTop: "8px" }}>
+            제보 유형
+          </SectionTitle>
+          <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+            <button
+              onClick={() => setReportType("inconvenience")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: "1px solid #ddd",
+                background:
+                  reportType === "inconvenience" ? "#0068B7" : "white",
+                color: reportType === "inconvenience" ? "white" : "#333",
+                cursor: "pointer",
+              }}
+            >
+              불편사항
+            </button>
+            <button
+              onClick={() => setReportType("suggestion")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: "1px solid #ddd",
+                background: reportType === "suggestion" ? "#0068B7" : "white",
+                color: reportType === "suggestion" ? "white" : "#333",
+                cursor: "pointer",
+              }}
+            >
+              제안사항
+            </button>
+          </div>
+
+          <SectionTitle style={{ width: "95%", marginTop: "8px" }}>
+            카테고리
+          </SectionTitle>
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              marginBottom: "15px",
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              onClick={() => setReportCategory("road")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: "1px solid #ddd",
+                background: reportCategory === "road" ? "#0068B7" : "white",
+                color: reportCategory === "road" ? "white" : "#333",
+                cursor: "pointer",
+              }}
+            >
+              도로
+            </button>
+            <button
+              onClick={() => setReportCategory("facility")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: "1px solid #ddd",
+                background: reportCategory === "facility" ? "#0068B7" : "white",
+                color: reportCategory === "facility" ? "white" : "#333",
+                cursor: "pointer",
+              }}
+            >
+              시설
+            </button>
+            <button
+              onClick={() => setReportCategory("safety")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: "1px solid #ddd",
+                background: reportCategory === "safety" ? "#0068B7" : "white",
+                color: reportCategory === "safety" ? "white" : "#333",
+                cursor: "pointer",
+              }}
+            >
+              안전
+            </button>
+            <button
+              onClick={() => setReportCategory("environment")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: "1px solid #ddd",
+                background:
+                  reportCategory === "environment" ? "#0068B7" : "white",
+                color: reportCategory === "environment" ? "white" : "#333",
+                cursor: "pointer",
+              }}
+            >
+              환경
+            </button>
+          </div>
+
+          <SectionTitle style={{ width: "95%", marginTop: "8px" }}>
+            어떠한 점을 제안하시나요?
+          </SectionTitle>
+          <input
+            type="text"
+            placeholder="제보 내용을 입력해주세요"
+            value={reportText}
+            onChange={(e) => setReportText(e.target.value)}
+            style={{
+              width: "90%",
+              height: "40px",
+              padding: "12px",
+              border: "1px solid #8C8C8C",
+              borderRadius: "10px",
+            }}
+          />
+        </ReportSection>
+
+        <ReportBTN
+          onClick={handleSubmitReport}
+          disabled={isSubmitting}
+          style={{
+            opacity: isSubmitting ? 0.6 : 1,
+            cursor: isSubmitting ? "not-allowed" : "pointer",
+          }}
+        >
+          {isSubmitting ? "제보 중..." : "제보하기"}
+        </ReportBTN>
+      </Whole>
+    </BottomSheet>
+  );
+}
