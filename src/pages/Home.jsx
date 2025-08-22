@@ -130,7 +130,7 @@ function Home() {
               fontWeight: "bold",
             }}
           >
-            {selectedTrail.name} - {feedbackData.length}개의 {feedbackType}
+            {selectedTrail.name} - {feedbackData.length}개 {feedbackType} 민원
           </div>
         )}
       </div>
