@@ -124,7 +124,7 @@ export default function Login() {
               cursor: isSubmitting ? "not-allowed" : "pointer",
             }}
           >
-            {isSubmitting ? "로그인 중..." : "로그인"}
+            {isSubmitting ? "로그인중" : "로그인"}
           </LoginButton>
         </ButtonsDiv>
       </div>

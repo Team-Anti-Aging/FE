@@ -508,6 +508,8 @@ export default function ReportPage({
                 >
                   브라우저에서 위치 접근 권한을 요청합니다. 팝업이 나타나면
                   "허용"을 선택해주세요.
+                  <br />
+                  계속해서 안된다면 chrome으로 접속해주세요
                 </div>
               </div>
             )}
