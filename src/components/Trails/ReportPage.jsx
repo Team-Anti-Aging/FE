@@ -70,6 +70,8 @@ export default function ReportPage({
   const [currentLocation, setCurrentLocation] = useState(null);
   const [currentAddress, setCurrentAddress] =
     useState("위치 정보 가져오는 중...");
+  const [locationError, setLocationError] = useState(false); // 위치 오류 상태
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false); // 위치 로딩 상태
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [reportText, setReportText] = useState("");
@@ -114,6 +116,10 @@ export default function ReportPage({
   // 웹 브라우저 기본 API 사용
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
+      setIsLoadingLocation(true);
+      setLocationError(false);
+      setCurrentAddress("위치 정보 가져오는 중...");
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const coords = {
@@ -121,14 +127,38 @@ export default function ReportPage({
             longitude: position.coords.longitude,
           };
           setCurrentLocation(coords);
+          setLocationError(false);
+          setIsLoadingLocation(false);
           // 좌표를 주소로 변환
           getAddressFromCoords(coords.latitude, coords.longitude);
         },
         (error) => {
           console.error("위치 정보를 가져올 수 없습니다:", error);
-          setCurrentAddress("위치 정보를 가져올 수 없습니다");
+          setCurrentLocation(null);
+          setLocationError(true);
+          setIsLoadingLocation(false);
+
+          // 오류 유형에 따른 메시지 설정
+          let errorMessage = "위치 정보를 가져올 수 없습니다";
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = "위치 접근 권한이 거부되었습니다";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = "위치 정보를 사용할 수 없습니다";
+              break;
+            case error.TIMEOUT:
+              errorMessage = "위치 정보 요청 시간이 초과되었습니다";
+              break;
+            default:
+              errorMessage = "위치 정보를 가져올 수 없습니다";
+          }
+          setCurrentAddress(errorMessage);
         }
       );
+    } else {
+      setLocationError(true);
+      setCurrentAddress("이 브라우저에서는 위치 정보를 지원하지 않습니다");
     }
   };
 
@@ -182,7 +212,9 @@ export default function ReportPage({
     }
 
     if (!currentLocation) {
-      alert("위치 정보를 가져올 수 없습니다. 다시 시도해주세요.");
+      alert(
+        "위치 정보가 필요합니다. '위치 허용 다시 요청' 버튼을 눌러 위치 정보를 허용해주세요."
+      );
       return;
     }
 
@@ -377,6 +409,50 @@ export default function ReportPage({
             <span style={{ fontSize: "17px", fontWeight: 500, color: "black" }}>
               {currentAddress}
             </span>
+            {isLoadingLocation && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  marginTop: "5px",
+                  fontSize: "12px",
+                  color: "#666",
+                }}
+              >
+                <div
+                  style={{
+                    width: "12px",
+                    height: "12px",
+                    border: "2px solid #f3f3f3",
+                    borderTop: "2px solid #3498db",
+                    borderRadius: "50%",
+                    animation: "spin 1s linear infinite",
+                  }}
+                ></div>
+                위치 정보 가져오는 중...
+              </div>
+            )}
+            {locationError && (
+              <button
+                onClick={getCurrentLocation}
+                style={{
+                  marginTop: "10px",
+                  padding: "8px 16px",
+                  border: "1px solid #0068B7",
+                  borderRadius: "20px",
+                  background: "#0068B7",
+                  color: "white",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                }}
+              >
+                📍 위치 허용 다시 요청
+              </button>
+            )}
           </MyLocation>
         </ReportSection>
 
