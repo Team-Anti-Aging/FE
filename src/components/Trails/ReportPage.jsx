@@ -72,6 +72,7 @@ export default function ReportPage({
     useState("위치 정보 가져오는 중...");
   const [locationError, setLocationError] = useState(false); // 위치 오류 상태
   const [isLoadingLocation, setIsLoadingLocation] = useState(false); // 위치 로딩 상태
+  const [showSafariGuide, setShowSafariGuide] = useState(false); // Safari 안내 표시 여부
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [reportText, setReportText] = useState("");
@@ -140,9 +141,18 @@ export default function ReportPage({
 
           // 오류 유형에 따른 메시지 설정
           let errorMessage = "위치 정보를 가져올 수 없습니다";
+          let showSafariGuide = false;
+
           switch (error.code) {
             case error.PERMISSION_DENIED:
               errorMessage = "위치 접근 권한이 거부되었습니다";
+              // Safari 감지
+              const isSafari = /^((?!chrome|android).)*safari/i.test(
+                navigator.userAgent
+              );
+              if (isSafari) {
+                showSafariGuide = true;
+              }
               break;
             case error.POSITION_UNAVAILABLE:
               errorMessage = "위치 정보를 사용할 수 없습니다";
@@ -154,6 +164,14 @@ export default function ReportPage({
               errorMessage = "위치 정보를 가져올 수 없습니다";
           }
           setCurrentAddress(errorMessage);
+
+          // Safari에서 권한 거부 시 안내 표시
+          if (showSafariGuide) {
+            setCurrentAddress(
+              "Safari에서 위치 권한이 거부되었습니다. 설정에서 권한을 허용해주세요."
+            );
+            setShowSafariGuide(true);
+          }
         }
       );
     } else {
@@ -434,24 +452,64 @@ export default function ReportPage({
               </div>
             )}
             {locationError && (
-              <button
-                onClick={getCurrentLocation}
-                style={{
-                  marginTop: "10px",
-                  padding: "8px 16px",
-                  border: "1px solid #0068B7",
-                  borderRadius: "20px",
-                  background: "#0068B7",
-                  color: "white",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
-                }}
-              >
-                📍 위치 허용 다시 요청
-              </button>
+              <div style={{ marginTop: "10px" }}>
+                <button
+                  onClick={getCurrentLocation}
+                  style={{
+                    padding: "8px 16px",
+                    border: "1px solid #0068B7",
+                    borderRadius: "20px",
+                    background: "#0068B7",
+                    color: "white",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  📍 위치 허용 다시 요청
+                </button>
+
+                {/* Safari 안내 */}
+                {showSafariGuide && (
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#666",
+                      lineHeight: "1.4",
+                      padding: "10px",
+                      background: "#f8f9fa",
+                      borderRadius: "8px",
+                      border: "1px solid #e9ecef",
+                    }}
+                  >
+                    <div style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                      📱 Safari 위치 권한 설정 방법:
+                    </div>
+                    <div style={{ fontSize: "11px" }}>
+                      1. 설정 앱 → Safari → 위치 서비스 → 허용
+                      <br />
+                      2. 또는 설정 앱 → 개인정보 보호 → 위치 서비스 → Safari →
+                      사용 중에 허용
+                    </div>
+                  </div>
+                )}
+
+                {/* 일반적인 안내 */}
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#666",
+                    marginTop: "5px",
+                    lineHeight: "1.4",
+                  }}
+                >
+                  브라우저에서 위치 접근 권한을 요청합니다. 팝업이 나타나면
+                  "허용"을 선택해주세요.
+                </div>
+              </div>
             )}
           </MyLocation>
         </ReportSection>
