@@ -67,11 +67,20 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [reportText, setReportText] = useState("");
-  const [reportType, setReportType] = useState("inconvenience"); // "inconvenience" 또는 "suggestion"
-  const [reportCategory, setReportCategory] = useState("road"); // 카테고리
+  const [reportType, setReportType] = useState("제안");
+  const [reportCategory, setReportCategory] = useState("경관 개선"); // 카테고리
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
+
+  // 제보 유형이 변경될 때 카테고리 초기화
+  useEffect(() => {
+    if (reportType === "불편") {
+      setReportCategory("안전");
+    } else {
+      setReportCategory("경관 개선");
+    }
+  }, [reportType]);
 
   // 좌표를 주소로 변환하는 함수
   const getAddressFromCoords = (lat, lng) => {
@@ -190,7 +199,7 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail }) {
       const requestData = {
         walktrail: trail.name, // ID 대신 산책로 이름 사용
         location: currentAddress,
-        type: reportType, // "inconvenience" 또는 "suggestion"
+        type: reportType, // "불편" 또는 "제안"
         category: reportCategory, // 카테고리 (예: "road", "facility", "safety" 등)
         latitude: currentLocation.latitude,
         longitude: currentLocation.longitude,
@@ -261,7 +270,7 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail }) {
             ←
           </BackButton>
           <TitleSection>
-            <Title>제보하기</Title>
+            <Title>민원 신청하기</Title>
           </TitleSection>
           <Spacer />
         </Header>
@@ -289,6 +298,206 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail }) {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+          }}
+        >
+          <SectionTitle style={{ width: "95%", marginTop: "8px" }}>
+            제보 유형
+          </SectionTitle>
+          <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+            <button
+              onClick={() => setReportType("제안")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: "1px solid #ddd",
+                background: reportType === "제안" ? "#0068B7" : "white",
+                color: reportType === "제안" ? "white" : "#333",
+                cursor: "pointer",
+              }}
+            >
+              제안사항
+            </button>
+            <button
+              onClick={() => setReportType("불편")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: "1px solid #ddd",
+                background: reportType === "불편" ? "#0068B7" : "white",
+                color: reportType === "불편" ? "white" : "#333",
+                cursor: "pointer",
+              }}
+            >
+              불편사항
+            </button>
+          </div>
+
+          <SectionTitle style={{ width: "95%", marginTop: "8px" }}>
+            카테고리
+          </SectionTitle>
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              marginBottom: "15px",
+              flexWrap: "wrap",
+            }}
+          >
+            {reportType === "불편" ? (
+              // 불편 카테고리
+              <>
+                <button
+                  onClick={() => setReportCategory("안전")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "20px",
+                    border: "1px solid #ddd",
+                    background: reportCategory === "안전" ? "#0068B7" : "white",
+                    color: reportCategory === "안전" ? "white" : "#333",
+                    cursor: "pointer",
+                  }}
+                >
+                  안전
+                </button>
+                <button
+                  onClick={() => setReportCategory("청결")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "20px",
+                    border: "1px solid #ddd",
+                    background: reportCategory === "청결" ? "#0068B7" : "white",
+                    color: reportCategory === "청결" ? "white" : "#333",
+                    cursor: "pointer",
+                  }}
+                >
+                  청결
+                </button>
+                <button
+                  onClick={() => setReportCategory("소음-방해")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "20px",
+                    border: "1px solid #ddd",
+                    background:
+                      reportCategory === "소음-방해" ? "#0068B7" : "white",
+                    color: reportCategory === "소음-방해" ? "white" : "#333",
+                    cursor: "pointer",
+                  }}
+                >
+                  소음-방해
+                </button>
+                <button
+                  onClick={() => setReportCategory("이동성")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "20px",
+                    border: "1px solid #ddd",
+                    background:
+                      reportCategory === "이동성" ? "#0068B7" : "white",
+                    color: reportCategory === "이동성" ? "white" : "#333",
+                    cursor: "pointer",
+                  }}
+                >
+                  이동성
+                </button>
+                <button
+                  onClick={() => setReportCategory("기타")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "20px",
+                    border: "1px solid #ddd",
+                    background: reportCategory === "기타" ? "#0068B7" : "white",
+                    color: reportCategory === "기타" ? "white" : "#333",
+                    cursor: "pointer",
+                  }}
+                >
+                  기타
+                </button>
+              </>
+            ) : (
+              // 제안 카테고리
+              <>
+                <button
+                  onClick={() => setReportCategory("경관 개선")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "20px",
+                    border: "1px solid #ddd",
+                    background:
+                      reportCategory === "경관 개선" ? "#0068B7" : "white",
+                    color: reportCategory === "경관 개선" ? "white" : "#333",
+                    cursor: "pointer",
+                  }}
+                >
+                  경관 개선
+                </button>
+                <button
+                  onClick={() => setReportCategory("정보 제공")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "20px",
+                    border: "1px solid #ddd",
+                    background:
+                      reportCategory === "정보 제공" ? "#0068B7" : "white",
+                    color: reportCategory === "정보 제공" ? "white" : "#333",
+                    cursor: "pointer",
+                  }}
+                >
+                  정보 제공
+                </button>
+                <button
+                  onClick={() => setReportCategory("프로그램/이벤트")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "20px",
+                    border: "1px solid #ddd",
+                    background:
+                      reportCategory === "프로그램/이벤트"
+                        ? "#0068B7"
+                        : "white",
+                    color:
+                      reportCategory === "프로그램/이벤트" ? "white" : "#333",
+                    cursor: "pointer",
+                  }}
+                >
+                  프로그램/이벤트
+                </button>
+                <button
+                  onClick={() => setReportCategory("편의시설 확충")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "20px",
+                    border: "1px solid #ddd",
+                    background:
+                      reportCategory === "편의시설 확충" ? "#0068B7" : "white",
+                    color:
+                      reportCategory === "편의시설 확충" ? "white" : "#333",
+                    cursor: "pointer",
+                  }}
+                >
+                  편의시설 확충
+                </button>
+                <button
+                  onClick={() => setReportCategory("기타")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "20px",
+                    border: "1px solid #ddd",
+                    background: reportCategory === "기타" ? "#0068B7" : "white",
+                    color: reportCategory === "기타" ? "white" : "#333",
+                    cursor: "pointer",
+                  }}
+                >
+                  기타
+                </button>
+              </>
+            )}
+          </div>
+        </ReportSection>
+        <ReportSection
+          style={{
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           <SectionTitle
@@ -348,112 +557,6 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail }) {
             style={{ display: "none" }}
             onChange={handleFileSelect}
           />
-        </ReportSection>
-
-        <ReportSection
-          style={{
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <SectionTitle style={{ width: "95%", marginTop: "8px" }}>
-            제보 유형
-          </SectionTitle>
-          <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
-            <button
-              onClick={() => setReportType("inconvenience")}
-              style={{
-                padding: "8px 16px",
-                borderRadius: "20px",
-                border: "1px solid #ddd",
-                background:
-                  reportType === "inconvenience" ? "#0068B7" : "white",
-                color: reportType === "inconvenience" ? "white" : "#333",
-                cursor: "pointer",
-              }}
-            >
-              불편사항
-            </button>
-            <button
-              onClick={() => setReportType("suggestion")}
-              style={{
-                padding: "8px 16px",
-                borderRadius: "20px",
-                border: "1px solid #ddd",
-                background: reportType === "suggestion" ? "#0068B7" : "white",
-                color: reportType === "suggestion" ? "white" : "#333",
-                cursor: "pointer",
-              }}
-            >
-              제안사항
-            </button>
-          </div>
-
-          <SectionTitle style={{ width: "95%", marginTop: "8px" }}>
-            카테고리
-          </SectionTitle>
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              marginBottom: "15px",
-              flexWrap: "wrap",
-            }}
-          >
-            <button
-              onClick={() => setReportCategory("road")}
-              style={{
-                padding: "8px 16px",
-                borderRadius: "20px",
-                border: "1px solid #ddd",
-                background: reportCategory === "road" ? "#0068B7" : "white",
-                color: reportCategory === "road" ? "white" : "#333",
-                cursor: "pointer",
-              }}
-            >
-              도로
-            </button>
-            <button
-              onClick={() => setReportCategory("facility")}
-              style={{
-                padding: "8px 16px",
-                borderRadius: "20px",
-                border: "1px solid #ddd",
-                background: reportCategory === "facility" ? "#0068B7" : "white",
-                color: reportCategory === "facility" ? "white" : "#333",
-                cursor: "pointer",
-              }}
-            >
-              시설
-            </button>
-            <button
-              onClick={() => setReportCategory("safety")}
-              style={{
-                padding: "8px 16px",
-                borderRadius: "20px",
-                border: "1px solid #ddd",
-                background: reportCategory === "safety" ? "#0068B7" : "white",
-                color: reportCategory === "safety" ? "white" : "#333",
-                cursor: "pointer",
-              }}
-            >
-              안전
-            </button>
-            <button
-              onClick={() => setReportCategory("environment")}
-              style={{
-                padding: "8px 16px",
-                borderRadius: "20px",
-                border: "1px solid #ddd",
-                background:
-                  reportCategory === "environment" ? "#0068B7" : "white",
-                color: reportCategory === "environment" ? "white" : "#333",
-                cursor: "pointer",
-              }}
-            >
-              환경
-            </button>
-          </div>
 
           <SectionTitle style={{ width: "95%", marginTop: "8px" }}>
             어떠한 점을 제안하시나요?
@@ -481,7 +584,7 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail }) {
             cursor: isSubmitting ? "not-allowed" : "pointer",
           }}
         >
-          {isSubmitting ? "제보 중..." : "제보하기"}
+          {isSubmitting ? "제보 중..." : "민원 신청하기"}
         </ReportBTN>
       </Whole>
     </BottomSheet>

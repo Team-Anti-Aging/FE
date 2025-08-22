@@ -39,7 +39,9 @@ export const Meta = styled.div`
   margin-top: 4px;
 `;
 
-export const Section = styled.div``;
+export const Section = styled.div`
+  padding-bottom: 1rem;
+`;
 
 export const ReportSection = styled.div`
   display: flex;
@@ -60,7 +62,7 @@ export const SectionTitle = styled.h3`
 export const Description = styled.p`
   font-size: 14px;
   color: #374151;
-  line-height: 1.6;
+  line-height: 2rem;
   margin: 0;
 `;
 

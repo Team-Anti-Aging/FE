@@ -53,11 +53,11 @@ export default function TrailDetailSheet({
           총 거리: {trail.distance_km}
           <br />
           예상 소요시간: {trail.duration}
-          <br />총 {trail.routes?.length || 0}개의 경유지점
+          <br />총 {trail.routes?.length || 0} 개의 경유지점
         </Description>
       </Section>
 
-      <ActionButton onClick={handleClick}>제보하기</ActionButton>
+      <ActionButton onClick={handleClick}>민원 신청하기</ActionButton>
     </BottomSheet>
   );
 }
