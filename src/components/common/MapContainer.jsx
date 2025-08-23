@@ -127,11 +127,12 @@ function MapContainer({
     // selectedTrail은 유지하여 지도에 경로가 계속 표시됨
   };
 
-  // 세부정보 시트 닫기
+  // 세부정보 시트 완전 닫기 (패널만 닫고 경로는 유지)
   const handleCloseDetailSheet = () => {
     setShowDetailSheet(false);
-    // selectedTrail을 null로 설정하지 않아서 지도에 경로가 유지됨
-    setCurrentPanel("trail-list");
+    // selectedTrail은 유지하여 지도에 경로가 계속 표시됨
+    // currentPanel은 설정하지 않아서 패널이 완전히 닫힘
+    setCurrentPanel(null); // 패널을 완전히 닫기 위해 null로 설정
   };
 
   // 제보 페이지로 이동
@@ -249,18 +250,20 @@ function MapContainer({
 
       {/* Trail 목록 시트 */}
       <TrailListSheet
-        open={sheetOpen && !showDetailSheet}
+        open={sheetOpen && !showDetailSheet && currentPanel !== null}
         trails={ALL_TRAILS}
         favorites={favorites}
         onToggleFavorite={onToggleFavorite}
         onSelectTrail={handleSelectTrail}
         onOpenCamera={() => alert("카메라 열기")}
-        onOpenSearch={onToggleSheet}
+        onOpenSearch={() => {
+          onToggleSheet();
+          setCurrentPanel("trail-list"); // 산책하기 버튼 클릭 시 목록 패널로 설정
+        }}
         onOpenInfo={() => alert("알림 안내")}
         onClose={() => {
           onCloseSheet();
-          // 목록 시트를 완전히 닫을 때만 선택된 trail 초기화
-          setSelectedTrail(null);
+          // 목록 시트를 닫을 때도 선택된 trail은 유지하여 경로가 계속 표시됨
         }}
         onOpenMyAccount={handleOpenMyAccount}
         onOpenLogin={handleOpenLogin}

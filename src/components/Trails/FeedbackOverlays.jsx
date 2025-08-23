@@ -99,7 +99,7 @@ const FeedbackOverlays = ({ feedbackData, map, feedbackType }) => {
 
         // 갤럭시 기기에 맞는 인포윈도우 스타일 조정
         const isGalaxy = isGalaxyDevice();
-        const padding = isGalaxy ? "8px" : "10px";
+        const padding = isGalaxy ? "12px" : "15px"; // 패딩 증가
         const minWidth = isGalaxy ? "150px" : "160px";
         const maxWidth = isGalaxy ? "280px" : "320px";
         const fontSize = isGalaxy ? "11px" : "12px";
@@ -109,7 +109,7 @@ const FeedbackOverlays = ({ feedbackData, map, feedbackType }) => {
 
         const infowindow = new window.kakao.maps.InfoWindow({
           content: `
-            <div style="padding:${padding};min-width:${minWidth};max-width:${maxWidth};position:relative;word-wrap:break-word;">
+            <div style="padding:${padding};min-width:${minWidth};max-width:${maxWidth};position:relative;word-wrap:break-word;overflow-wrap:break-word;">
               <div style="
                 position:absolute;
                 top:3px;
@@ -129,18 +129,18 @@ const FeedbackOverlays = ({ feedbackData, map, feedbackType }) => {
               " id="closeBtn">
                 ×
               </div>
-              <h4 style="margin:0 0 4px 0;color:${
+              <h4 style="margin:0 0 8px 0;color:${
                 feedback.type === "제안" ? "#4CAF50" : "#F44336"
               };font-size:${isGalaxy ? "13px" : "14px"};">
                 ${feedback.type}
               </h4>
-              <p style="margin:4px 0;font-size:${fontSize};">
+              <p style="margin:6px 0;font-size:${fontSize};">
                 <strong>카테고리:</strong> ${feedback.category}
               </p>
-              <p style="margin:4px 0;font-size:${fontSize};word-wrap:break-word;overflow-wrap:break-word;">
+              <p style="margin:6px 0;font-size:${fontSize};word-wrap:break-word;overflow-wrap:break-word;">
                 <strong>내용:</strong> ${feedback.feedback_content}
               </p>
-              <p style="margin:4px 0;font-size:${fontSize};">
+              <p style="margin:6px 0;font-size:${fontSize};">
                 <strong>상태:</strong> 
                 <span style="color:${getStatusColor(
                   feedback.status
@@ -148,7 +148,7 @@ const FeedbackOverlays = ({ feedbackData, map, feedbackType }) => {
                   ${getStatusText(feedback.status)}
                 </span>
               </p>
-              <p style="margin:4px 0;font-size:${smallFontSize};color:#666;">
+              <p style="margin:8px 0 0 0;font-size:${smallFontSize};color:#666;">
                 ${new Date(feedback.created_at).toLocaleDateString()}
               </p>
             </div>

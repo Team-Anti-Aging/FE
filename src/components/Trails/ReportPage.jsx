@@ -23,6 +23,7 @@ import styled from "styled-components";
 import Location from "../../assets/location.png";
 import Camera from "../../assets/camera.svg";
 import { ALL_TRAILS } from "./TrailData.js";
+import { getDetailPanelHeight } from "../../utils/screenUtils";
 
 const BASEURL = "/api"; // 프록시를 통해 요청
 
