@@ -24,6 +24,10 @@ import Search from "../../assets/Search.svg";
 import Camera from "../../assets/camera.svg";
 import Person from "../../assets/person.png";
 import { ALL_TRAILS } from "./TrailData.js";
+import {
+  getAccountPanelHeight,
+  getDetailPanelHeight,
+} from "../../utils/screenUtils";
 
 const AccountInfo = styled.div`
   display: flex;
@@ -310,7 +314,7 @@ export default function MyAccount({
     <BottomSheet
       open={showFeedbackDetail}
       onClose={() => setShowFeedbackDetail(false)}
-      height="80vh"
+      height={getDetailPanelHeight()}
       handleLabel="제보한 민원 상세보기 닫기"
     >
       <Whole>
@@ -408,7 +412,7 @@ export default function MyAccount({
     <BottomSheet
       open={showFavoriteDetail}
       onClose={() => setShowFavoriteDetail(false)}
-      height="80vh"
+      height={getDetailPanelHeight()}
       handleLabel="즐겨찾기 상세보기 닫기"
     >
       <Whole>
@@ -486,9 +490,9 @@ export default function MyAccount({
     <>
       <BottomSheet
         open={true}
-        onClose={onClose}
-        height="60vh"
-        handleLabel="내 계정 닫기"
+        onClose={onBackToTrailList}
+        height={getAccountPanelHeight()}
+        handleLabel="목록으로 돌아가기"
       >
         <Whole>
           <Header>

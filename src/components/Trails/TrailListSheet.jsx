@@ -13,6 +13,7 @@ import {
 import Camera from "../../assets/camera.svg";
 import Search from "../../assets/Search.svg";
 import Person from "../../assets/person.png";
+import { getGalaxyOptimizedHeight } from "../../utils/screenUtils";
 
 export default function TrailListSheet({
   open = false,
@@ -162,7 +163,7 @@ export default function TrailListSheet({
       <BottomSheet
         open={open}
         onClose={onClose}
-        height="32rem"
+        height={getGalaxyOptimizedHeight()}
         handleLabel="Trail 목록 닫기"
       >
         <List>

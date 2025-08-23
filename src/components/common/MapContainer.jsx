@@ -124,12 +124,13 @@ function MapContainer({
   const handleBackToList = () => {
     setShowDetailSheet(false);
     setCurrentPanel("trail-list");
+    // selectedTrail은 유지하여 지도에 경로가 계속 표시됨
   };
 
   // 세부정보 시트 닫기
   const handleCloseDetailSheet = () => {
     setShowDetailSheet(false);
-    setSelectedTrail(null);
+    // selectedTrail을 null로 설정하지 않아서 지도에 경로가 유지됨
     setCurrentPanel("trail-list");
   };
 
@@ -256,7 +257,11 @@ function MapContainer({
         onOpenCamera={() => alert("카메라 열기")}
         onOpenSearch={onToggleSheet}
         onOpenInfo={() => alert("알림 안내")}
-        onClose={onCloseSheet}
+        onClose={() => {
+          onCloseSheet();
+          // 목록 시트를 완전히 닫을 때만 선택된 trail 초기화
+          setSelectedTrail(null);
+        }}
         onOpenMyAccount={handleOpenMyAccount}
         onOpenLogin={handleOpenLogin}
         onCameraPhotoTaken={handleCameraPhotoTaken}

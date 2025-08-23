@@ -9,6 +9,7 @@ const SheetWrap = styled.div`
   bottom: 0;
   width: min(100vw, 520px);
   z-index: 1000;
+  padding-bottom: 30px;
   pointer-events: ${(props) => (props.$open ? "auto" : "none")};
 `;
 const Sheet = styled.div`

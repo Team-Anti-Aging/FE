@@ -28,7 +28,11 @@ export default function TrailDetailSheet({
   };
 
   return (
-    <BottomSheet open={true} onClose={onClose} handleLabel="세부정보 닫기">
+    <BottomSheet
+      open={true}
+      onClose={onBackToList}
+      handleLabel="목록으로 돌아가기"
+    >
       <Header>
         <BackButton onClick={onBackToList} aria-label="목록으로 돌아가기">
           ←

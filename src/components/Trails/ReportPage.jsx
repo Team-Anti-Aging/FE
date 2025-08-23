@@ -332,9 +332,9 @@ export default function ReportPage({
   return (
     <BottomSheet
       open={true}
-      onClose={onClose}
-      height="90vh"
-      handleLabel="제보하기 페이지 닫기"
+      onClose={onBackToTrailDetail}
+      height={getDetailPanelHeight()}
+      handleLabel="산책로 상세정보로 돌아가기"
     >
       <Whole>
         <Header>

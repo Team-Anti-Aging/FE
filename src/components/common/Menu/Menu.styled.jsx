@@ -10,7 +10,23 @@ export const MenuContainer = styled.div`
   background: white;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   border-radius: 14px;
-  padding: 16px 20px;
+  padding: ${() => {
+    // 갤럭시 기기 감지
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isAndroid = userAgent.includes("android");
+    const isSamsung =
+      userAgent.includes("samsung") || userAgent.includes("sm-");
+
+    if (
+      isAndroid &&
+      (isSamsung ||
+        userAgent.includes("chrome") ||
+        userAgent.includes("safari"))
+    ) {
+      return "14px 18px"; // 갤럭시용 더 작은 패딩
+    }
+    return "16px 20px"; // 기본 패딩
+  }};
   z-index: 2000;
 `;
 
@@ -23,8 +39,40 @@ export const MenuInner = styled.div`
 
 export const MenuCam = styled.div`
   background-color: #3a7252;
-  width: 50px;
-  height: 50px;
+  width: ${() => {
+    // 갤럭시 기기 감지
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isAndroid = userAgent.includes("android");
+    const isSamsung =
+      userAgent.includes("samsung") || userAgent.includes("sm-");
+
+    if (
+      isAndroid &&
+      (isSamsung ||
+        userAgent.includes("chrome") ||
+        userAgent.includes("safari"))
+    ) {
+      return "48px"; // 갤럭시용 적당한 크기
+    }
+    return "50px"; // 기본 크기
+  }};
+  height: ${() => {
+    // 갤럭시 기기 감지
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isAndroid = userAgent.includes("android");
+    const isSamsung =
+      userAgent.includes("samsung") || userAgent.includes("sm-");
+
+    if (
+      isAndroid &&
+      (isSamsung ||
+        userAgent.includes("chrome") ||
+        userAgent.includes("safari"))
+    ) {
+      return "48px"; // 갤럭시용 적당한 크기
+    }
+    return "50px"; // 기본 크기
+  }};
   border-radius: 50px;
   display: flex;
   align-items: center;

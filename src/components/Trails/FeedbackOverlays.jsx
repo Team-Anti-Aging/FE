@@ -3,6 +3,18 @@ import React, { useEffect, useRef } from "react";
 import ICONpurpose from "../../assets/ICONpurpose.svg";
 import ICONproblem from "../../assets/ICONinconvenience.svg";
 
+// 갤럭시 기기 감지 함수
+const isGalaxyDevice = () => {
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isAndroid = userAgent.includes("android");
+  const isSamsung = userAgent.includes("samsung") || userAgent.includes("sm-");
+
+  return (
+    isAndroid &&
+    (isSamsung || userAgent.includes("chrome") || userAgent.includes("safari"))
+  );
+};
+
 const FeedbackOverlays = ({ feedbackData, map, feedbackType }) => {
   const markersRef = useRef([]);
   const infowindowsRef = useRef([]);
@@ -42,9 +54,14 @@ const FeedbackOverlays = ({ feedbackData, map, feedbackType }) => {
         const markerImageSrc =
           feedback.type === "제안" ? ICONpurpose : ICONproblem;
 
+        // 갤럭시 기기에 맞는 마커 크기 조정
+        const markerSize = isGalaxyDevice()
+          ? new window.kakao.maps.Size(28, 32) // 갤럭시용 더 작은 크기
+          : new window.kakao.maps.Size(31, 35); // 기본 크기
+
         const markerImage = new window.kakao.maps.MarkerImage(
           markerImageSrc,
-          new window.kakao.maps.Size(31, 35)
+          markerSize
         );
 
         const marker = new window.kakao.maps.Marker({
@@ -80,19 +97,29 @@ const FeedbackOverlays = ({ feedbackData, map, feedbackType }) => {
           }
         };
 
+        // 갤럭시 기기에 맞는 인포윈도우 스타일 조정
+        const isGalaxy = isGalaxyDevice();
+        const padding = isGalaxy ? "8px" : "10px";
+        const minWidth = isGalaxy ? "150px" : "160px";
+        const maxWidth = isGalaxy ? "280px" : "320px";
+        const fontSize = isGalaxy ? "11px" : "12px";
+        const smallFontSize = isGalaxy ? "9px" : "10px";
+        const closeBtnSize = isGalaxy ? "18px" : "20px";
+        const closeBtnFontSize = isGalaxy ? "12px" : "14px";
+
         const infowindow = new window.kakao.maps.InfoWindow({
           content: `
-            <div style="padding:10px;min-width:200px;position:relative;">
+            <div style="padding:${padding};min-width:${minWidth};max-width:${maxWidth};position:relative;word-wrap:break-word;">
               <div style="
                 position:absolute;
-                top:5px;
-                right:5px;
+                top:3px;
+                right:3px;
                 background:#f44336;
                 color:white;
                 border-radius:50%;
-                width:20px;
-                height:20px;
-                font-size:14px;
+                width:${closeBtnSize};
+                height:${closeBtnSize};
+                font-size:${closeBtnFontSize};
                 cursor:pointer;
                 display:flex;
                 align-items:center;
@@ -102,18 +129,18 @@ const FeedbackOverlays = ({ feedbackData, map, feedbackType }) => {
               " id="closeBtn">
                 ×
               </div>
-              <h4 style="margin:0 0 5px 0;color:${
+              <h4 style="margin:0 0 4px 0;color:${
                 feedback.type === "제안" ? "#4CAF50" : "#F44336"
-              }">
+              };font-size:${isGalaxy ? "13px" : "14px"};">
                 ${feedback.type}
               </h4>
-              <p style="margin:5px 0;font-size:12px;">
+              <p style="margin:4px 0;font-size:${fontSize};">
                 <strong>카테고리:</strong> ${feedback.category}
               </p>
-              <p style="margin:5px 0;font-size:12px;">
+              <p style="margin:4px 0;font-size:${fontSize};word-wrap:break-word;overflow-wrap:break-word;">
                 <strong>내용:</strong> ${feedback.feedback_content}
               </p>
-              <p style="margin:5px 0;font-size:12px;">
+              <p style="margin:4px 0;font-size:${fontSize};">
                 <strong>상태:</strong> 
                 <span style="color:${getStatusColor(
                   feedback.status
@@ -121,7 +148,7 @@ const FeedbackOverlays = ({ feedbackData, map, feedbackType }) => {
                   ${getStatusText(feedback.status)}
                 </span>
               </p>
-              <p style="margin:5px 0;font-size:10px;color:#666;">
+              <p style="margin:4px 0;font-size:${smallFontSize};color:#666;">
                 ${new Date(feedback.created_at).toLocaleDateString()}
               </p>
             </div>
