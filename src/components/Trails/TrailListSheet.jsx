@@ -32,6 +32,64 @@ export default function TrailListSheet({
   // 로그인 상태 확인
   const isLoggedIn = !!localStorage.getItem("accessToken");
 
+  // 즐겨찾기 토글 함수
+  const handleToggleFavorite = async (trailName) => {
+    if (!isLoggedIn) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    const token = localStorage.getItem("accessToken");
+    const isCurrentlyFavorite = !!favorites?.[trailName];
+
+    try {
+      if (isCurrentlyFavorite) {
+        // 즐겨찾기 삭제
+        const response = await fetch(
+          `/api/mypage/favorite/post/${encodeURIComponent(trailName)}/`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.ok) {
+          console.log(`${trailName} 즐겨찾기 삭제 성공`);
+          onToggleFavorite(trailName);
+        } else {
+          console.error("즐겨찾기 삭제 실패:", response.status);
+          alert("즐겨찾기 삭제에 실패했습니다.");
+        }
+      } else {
+        // 즐겨찾기 추가
+        const response = await fetch(
+          `/api/mypage/favorite/post/${encodeURIComponent(trailName)}/`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.ok) {
+          console.log(`${trailName} 즐겨찾기 추가 성공`);
+          onToggleFavorite(trailName);
+        } else {
+          console.error("즐겨찾기 추가 실패:", response.status);
+          alert("즐겨찾기 추가에 실패했습니다.");
+        }
+      }
+    } catch (error) {
+      console.error("즐겨찾기 토글 중 오류:", error);
+      alert("즐겨찾기 처리 중 오류가 발생했습니다.");
+    }
+  };
+
   // 카메라 버튼 클릭 핸들러
   const handleCameraClick = async () => {
     console.log("하단 카메라 버튼 클릭됨");
@@ -129,7 +187,7 @@ export default function TrailListSheet({
                   $active={!!favorites?.[t.name]}
                   onClick={(e) => {
                     e.stopPropagation();
-                    onToggleFavorite(t.name);
+                    handleToggleFavorite(t.name);
                   }}
                 >
                   ♥

@@ -24,6 +24,56 @@ function MapContainer({
   const [currentPanel, setCurrentPanel] = useState("trail-list"); // 'trail-list', 'trail-detail', 'report', 'my-account'
   const [cameraPhoto, setCameraPhoto] = useState(null); // 카메라로 찍은 사진
 
+  // 즐겨찾기 목록 가져오기
+  const fetchFavorites = async () => {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      console.log("토큰이 없어서 즐겨찾기 목록을 가져올 수 없습니다.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/mypage/favorite/list/", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("즐겨찾기 목록:", data);
+
+        // API 응답을 favorites 객체 형태로 변환
+        const favoritesObj = {};
+        if (Array.isArray(data)) {
+          data.forEach((item) => {
+            // API 응답 구조에 따라 수정 필요
+            const trailName =
+              item.walktrail || item.walktrail_name || item.name;
+            if (trailName) {
+              favoritesObj[trailName] = true;
+            }
+          });
+        }
+
+        setFavorites(favoritesObj);
+        console.log("변환된 즐겨찾기 객체:", favoritesObj);
+      } else {
+        console.error("즐겨찾기 목록 가져오기 실패:", response.status);
+      }
+    } catch (error) {
+      console.error("즐겨찾기 목록 가져오기 중 오류:", error);
+    }
+  };
+
+  // 컴포넌트 마운트 시 즐겨찾기 목록 가져오기
+  useEffect(() => {
+    fetchFavorites();
+  }, []);
+
   // 피드백 데이터가 변경될 때마다 로그 출력
   useEffect(() => {
     if (feedbackData && feedbackData.length > 0) {
@@ -32,8 +82,15 @@ function MapContainer({
     }
   }, [feedbackData, feedbackType]);
 
-  const onToggleFavorite = (name) =>
+  const onToggleFavorite = (name) => {
+    // 로컬 상태 업데이트
     setFavorites((f) => ({ ...f, [name]: !f[name] }));
+
+    // 즐겨찾기 목록 새로고침 (서버와 동기화)
+    setTimeout(() => {
+      fetchFavorites();
+    }, 500);
+  };
 
   // Trail 선택 시 세부정보 시트 표시
   const handleSelectTrail = (trail) => {
