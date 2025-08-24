@@ -249,32 +249,46 @@ export default function ReportPage({
       console.log("토큰 값:", token ? token.substring(0, 20) + "..." : "없음");
 
       if (!token) {
-        alert("로그인이 필요합니다. 로그인 후 다시 시도해주세요.");
+        alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
         setIsSubmitting(false);
+        navigate("/login");
         return;
       }
 
-      // JSON 데이터 준비
-      const requestData = {
-        walktrail: selectedTrail.name, // 선택된 trail 이름 사용
+      // FormData를 사용하여 이미지 파일과 함께 전송
+      const formData = new FormData();
+      formData.append("walktrail", selectedTrail.name);
+      formData.append("location", currentAddress);
+      formData.append("type", reportType);
+      formData.append("category", reportCategory);
+      formData.append("latitude", currentLocation.latitude);
+      formData.append("longitude", currentLocation.longitude);
+      formData.append("feedback_content", reportText.trim());
+
+      // 이미지 파일이 있으면 추가
+      if (selectedImage) {
+        formData.append("feedback_image", selectedImage);
+      }
+
+      console.log("전송할 데이터:", {
+        walktrail: selectedTrail.name,
         location: currentAddress,
-        type: reportType, // "불편" 또는 "제안"
-        category: reportCategory, // 카테고리 (예: "road", "facility", "safety" 등)
+        type: reportType,
+        category: reportCategory,
         latitude: currentLocation.latitude,
         longitude: currentLocation.longitude,
         feedback_content: reportText.trim(),
-        feedback_image_url: "", // 이미지가 있다면 URL을 설정해야 함
-      };
-
-      console.log("전송할 데이터:", requestData);
+        hasImage: !!selectedImage,
+        imageName: selectedImage?.name,
+      });
 
       const response = await fetch(`${BASEURL}/feedback/upload/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+          // Content-Type은 FormData가 자동으로 설정하므로 제거
         },
-        body: JSON.stringify(requestData),
+        body: formData,
       });
 
       if (response.ok) {
