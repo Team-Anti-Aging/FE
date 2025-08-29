@@ -360,7 +360,7 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail, camera
             formData.append('latitude', currentLocation.latitude);
             formData.append('longitude', currentLocation.longitude);
             formData.append('feedback_content', reportText.trim());
-            //  TODO: 백엔드에서 만들면 추가 formData.append('ai_sum', aiKeyword)
+            formData.append('ai_keyword', aiKeyword);
 
             // 이미지 파일이 있으면 추가
             if (selectedImage) {
@@ -894,7 +894,7 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail, camera
                     <AiSection>
                         <span style={{ color: 'black', fontSize: '1.5rem' }}>AI 요약</span>
                         <br />
-                        <span style={{ color: 'black', fontWeight: 'bold' }}>태그</span>
+                        <span style={{ color: 'black', fontWeight: 'bold' }}>키워드</span>
                         <AiInput value={aiKeyword.ai_keyword ?? ''} onChange={(e) => setAiKeyword(e.target.value)} />
                         <span style={{ color: 'black', fontWeight: 'bold' }}>상황</span>
                         <AiInput value={aiKeyword.ai_situation ?? ''} onChange={(e) => setAiKeyword(e.target.value)} />
