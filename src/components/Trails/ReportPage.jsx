@@ -62,6 +62,22 @@ const ImagePreview = styled.div`
     }
 `;
 
+const AIBtn = styled.button`
+    background-color: #0068b7;
+    color: white;
+    border-radius: 50px;
+    padding: 12px;
+    width: 60%;
+    display: flex;
+    align-self: center;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+`;
+
 export default function ReportPage({ trail, onClose, onBackToTrailDetail, cameraPhoto }) {
     const [currentLocation, setCurrentLocation] = useState(null);
     const [currentAddress, setCurrentAddress] = useState('위치 정보 가져오는 중...');
@@ -76,8 +92,12 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail, camera
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedTrail, setSelectedTrail] = useState(trail); // 선택된 trail
     const [showTrailSelector, setShowTrailSelector] = useState(false); // trail 선택기 표시 여부
+    const [isAiSum, setIsAiSum] = useState(false); // AI요약 여부
+
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
+
+    const handleAiSum = () => {};
 
     // 제보 유형이 변경될 때 카테고리 초기화
     useEffect(() => {
@@ -778,16 +798,20 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail, camera
                     />
                 </ReportSection>
 
-                <ReportBTN
-                    onClick={handleSubmitReport}
-                    disabled={isSubmitting}
-                    style={{
-                        opacity: isSubmitting ? 0.6 : 1,
-                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                    }}
-                >
-                    {isSubmitting ? '제보 중...' : '민원 신청하기'}
-                </ReportBTN>
+                {isAiSum ? (
+                    <ReportBTN
+                        onClick={handleSubmitReport}
+                        disabled={isSubmitting}
+                        style={{
+                            opacity: isSubmitting ? 0.6 : 1,
+                            cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                        }}
+                    >
+                        {isSubmitting ? '제보 중...' : '민원 신청하기'}
+                    </ReportBTN>
+                ) : (
+                    <AIBtn onClick={handleAiSum}>AI 요약</AIBtn>
+                )}
             </Whole>
         </BottomSheet>
     );
