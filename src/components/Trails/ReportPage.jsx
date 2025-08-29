@@ -360,7 +360,12 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail, camera
             formData.append('latitude', currentLocation.latitude);
             formData.append('longitude', currentLocation.longitude);
             formData.append('feedback_content', reportText.trim());
-            formData.append('ai_keyword', aiKeyword);
+            formData.append('ai_keyword', aiKeyword.ai_keyword);
+            formData.append('ai_situation', aiKeyword.ai_situation);
+            formData.append('ai_demand', aiKeyword.ai_demand);
+            formData.append('ai_importance', aiKeyword.ai_importance);
+            formData.append('ai_expected_duration', aiKeyword.ai_expected_duration);
+            formData.append('ai_solution', aiKeyword.ai_solution);
 
             // 이미지 파일이 있으면 추가
             if (selectedImage) {
