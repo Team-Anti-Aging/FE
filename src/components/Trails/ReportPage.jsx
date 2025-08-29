@@ -77,6 +77,22 @@ const AIBtn = styled.button`
     font-weight: 600;
     cursor: pointer;
 `;
+const AiSection = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    border-radius: 12px;
+    border: solid 1px black;
+    padding: 0.5rem;
+`;
+const AiInput = styled.input`
+    background-color: white;
+    border: solid;
+    color: black;
+    height: 3rem;
+    border-radius: 15px;
+    padding-left: 0.5rem;
+`;
 
 export default function ReportPage({ trail, onClose, onBackToTrailDetail, cameraPhoto }) {
     const [currentLocation, setCurrentLocation] = useState(null);
@@ -93,11 +109,10 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail, camera
     const [selectedTrail, setSelectedTrail] = useState(trail); // 선택된 trail
     const [showTrailSelector, setShowTrailSelector] = useState(false); // trail 선택기 표시 여부
     const [isAiSum, setIsAiSum] = useState(false); // AI요약 여부
+    const [aiKeyword, setAiKeyword] = useState({});
 
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
-
-    const handleAiSum = () => {};
 
     // 제보 유형이 변경될 때 카테고리 초기화
     useEffect(() => {
@@ -231,6 +246,82 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail, camera
         }
     };
 
+    // AI요약
+    const handleAiSum = async () => {
+        const SYSTEM = `
+당신은 산책로 민원 데이터를 처리하는 공무원입니다.
+아래 “민원 원문”을 분석하여, 지정된 JSON 스키마에 맞춰 결과만 반환하세요.
+반드시 유효한 JSON만 출력하세요. 불필요한 텍스트는 출력하지 마세요.
+그전에, 함께 보낸 이미지를 분석해서 만약 "민원 원문" 과 이미지가 무관하다면 "잘못된 이미지"를 반환해주세요. 조건은 다음과 같습니다.
+1. 이미지가 산책로와 명백히 무관할 때: 실내(집/가게/화장실/교실/사무실 등), 음식·영수증·컴퓨터/휴대폰 스크린샷, 메모·낙서·밈, 순수 셀카·반려동물 클로즈업, 하늘만 찍힘, 초점/노출 불량으로 내용 판별 불가(검은 화면/심한 흔들림 등).
+2. 이미지–설명 불일치가 심각할 때: 설명이 산책/보행·시설·환경 문제와 무관한 잡담·광고·일상 멘트(예: “오늘 저녁 라면”)이거나, 이미지와 뚜렷이 모순.
+
+[제약]
+1. 만약 민원 원문과 이미지가 무관하다면
+    - ai_valid : false
+2. 만약 민원 원문과 이미지가 연관이 있다면
+    - ai_keyword: 한 단어만.
+    - ai_situation: 문제 상황을 적어주고, 없으면 null로
+    - ai_demand: 요구사항을 적어주고, 없으면 null로
+    - ai_importance: "높음" | "중간" | "낮음" (높음: 안전 관련 / 중간: 불편하지만 긴급하진 않음 / 낮음: 개선되면 좋지만 시급하지 않음)
+    - ai_expected_duration: "긴급" | "단기" | "중장기" (처리 소요시간)
+    - ai_solution: 실행 가능한 조치 1문장만.
+`;
+
+        try {
+            // 로컬 스토리지에서 토큰 가져오기
+            const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+
+            if (!token) {
+                alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
+                setIsSubmitting(false);
+                navigate('/login');
+                return;
+            }
+            // 이미지가 있으면 멀티모달 형식으로 보냄 (imagePreview는 이미 Data URL)
+            const userContent =
+                selectedImage && imagePreview
+                    ? [
+                          { type: 'text', text: reportText || '' },
+                          { type: 'image_url', image_url: { url: imagePreview } },
+                      ]
+                    : reportText;
+
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${import.meta.env.VITE_APP_GPT_API}`,
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini',
+                    temperature: 0.1,
+                    response_format: { type: 'json_object' },
+                    messages: [
+                        { role: 'system', content: SYSTEM },
+                        { role: 'user', content: userContent },
+                    ],
+                }),
+            });
+            console.log(response);
+            const data = await response.json();
+            const content = data?.choices?.[0]?.message?.content ?? ''; // AI 반환
+            const ai = JSON.parse(content); // object
+            console.log('ai요약', ai);
+            if (!ai.ai_valid) {
+                alert('민원 문구와 일치하지 않는 이미지입니다.');
+                setAiKeyword({});
+                handleRemoveImage();
+                setIsAiSum(false);
+            } else {
+                setAiKeyword(ai);
+                setIsAiSum(true);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     // 민원 제보하기
     const handleSubmitReport = async () => {
         // 입력 검증
@@ -269,6 +360,7 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail, camera
             formData.append('latitude', currentLocation.latitude);
             formData.append('longitude', currentLocation.longitude);
             formData.append('feedback_content', reportText.trim());
+            //  TODO: 백엔드에서 만들면 추가 formData.append('ai_sum', aiKeyword)
 
             // 이미지 파일이 있으면 추가
             if (selectedImage) {
@@ -797,8 +889,22 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail, camera
                         }}
                     />
                 </ReportSection>
-
+                <AIBtn onClick={handleAiSum}>AI 요약</AIBtn>
                 {isAiSum ? (
+                    <AiSection>
+                        <span style={{ color: 'black', fontSize: '1.5rem' }}>AI 요약</span>
+                        <br />
+                        <span style={{ color: 'black', fontWeight: 'bold' }}>태그</span>
+                        <AiInput value={aiKeyword.ai_keyword ?? ''} onChange={(e) => setAiKeyword(e.target.value)} />
+                        <span style={{ color: 'black', fontWeight: 'bold' }}>상황</span>
+                        <AiInput value={aiKeyword.ai_situation ?? ''} onChange={(e) => setAiKeyword(e.target.value)} />
+                        <span style={{ color: 'black', fontWeight: 'bold' }}>요구사항</span>
+                        <AiInput value={aiKeyword.ai_demand ?? ''} onChange={(e) => setAiKeyword(e.target.value)} />
+                    </AiSection>
+                ) : (
+                    <></>
+                )}
+                {isAiSum && (
                     <ReportBTN
                         onClick={handleSubmitReport}
                         disabled={isSubmitting}
@@ -809,8 +915,6 @@ export default function ReportPage({ trail, onClose, onBackToTrailDetail, camera
                     >
                         {isSubmitting ? '제보 중...' : '민원 신청하기'}
                     </ReportBTN>
-                ) : (
-                    <AIBtn onClick={handleAiSum}>AI 요약</AIBtn>
                 )}
             </Whole>
         </BottomSheet>
